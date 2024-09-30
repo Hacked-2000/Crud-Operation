@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { resetEditUser } from "./userSlice";
 import { useNavigate } from "react-router-dom";
+import { addUser } from "./userSlice";
 
 const FormComponent = ({ onFormSubmit, editUser, btnClass }) => {
   const [formData, setFormData] = useState({
@@ -10,8 +11,11 @@ const FormComponent = ({ onFormSubmit, editUser, btnClass }) => {
     mobile: "",
     organisation: "",
     salary: "",
+    statmentUpload: "",
+    multipleUpload: "",
     reportingManager: "",
     salaryCredit: "",
+    jobMode:"",
   });
 
   const navigate = useNavigate();
@@ -25,13 +29,19 @@ const FormComponent = ({ onFormSubmit, editUser, btnClass }) => {
   }, [editUser]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-
+    const { name, value, files } = e.target;
     if (name === "mobile") {
       if (!/^\d*$/.test(value)) return; // Allow only numbers
       if (value.length <= 10) {
         setFormData({ ...formData, [name]: value });
       }
+    } else if (name === "statmentUpload") {
+      setFormData({ ...formData, [name]: files[0] }); // store the uploaded file
+      // console.log(e.target.files[0]);
+    } else if (name === "multipleUpload") {
+      setFormData({ ...formData, [name]: Array.from(files) });
+      // console.log(Array.from(files));
+      // Store the array of uploaded files
     } else {
       setFormData({ ...formData, [name]: value });
     }
@@ -53,8 +63,10 @@ const FormComponent = ({ onFormSubmit, editUser, btnClass }) => {
     if (!formData.organisation)
       newErrors.organisation = "Organisation is required";
     if (!formData.salary) newErrors.salary = "Salary is required";
+    if (!formData.jobMode) newErrors.salary = "JobMode is required";
     if (!formData.reportingManager)
       newErrors.reportingManager = "Reporting Manager is required";
+    // if (!formData.statmentUpload) newErrors.statmentUpload = "Statment is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -65,18 +77,21 @@ const FormComponent = ({ onFormSubmit, editUser, btnClass }) => {
     if (validate()) {
       const newUser = { ...formData, id: editUser ? editUser.id : Date.now() };
       onFormSubmit(newUser);
-      navigate("/UserTable");  // Navigate to UserTable
+      navigate("/UserTable"); // Navigate to UserTable
       setFormData({
         name: "",
         email: "",
         mobile: "",
         organisation: "",
         salary: "",
+        statmentUpload: "",
+        multipleUpload: "",
         reportingManager: "",
         salaryCredit: "",
+        jobMode:"",
       });
       setErrors({});
-      dispatch(resetEditUser());  // Reset the edit user state in Redux
+      dispatch(resetEditUser()); // Reset the edit user state in Redux
     }
   };
 
@@ -85,7 +100,11 @@ const FormComponent = ({ onFormSubmit, editUser, btnClass }) => {
       <h1 className="text-primary d-flex justify-content-center">
         Welcome To Form
       </h1>
-      <form onSubmit={handleSubmit} className="p-4 border rounded bg-light">
+      <form
+        onSubmit={handleSubmit}
+        className="p-4 border rounded bg-light"
+        enctype="multipart/form-data"
+      >
         {/* Input fields and validation messages */}
         {/* Name Field */}
         <div className="form-group">
@@ -138,7 +157,9 @@ const FormComponent = ({ onFormSubmit, editUser, btnClass }) => {
         <div className="form-group">
           <label>Organisational Group:</label>
           <select
-            className={`form-control ${errors.organisation ? "is-invalid" : ""}`}
+            className={`form-control ${
+              errors.organisation ? "is-invalid" : ""
+            }`}
             id="organisation"
             name="organisation"
             value={formData.organisation}
@@ -174,11 +195,44 @@ const FormComponent = ({ onFormSubmit, editUser, btnClass }) => {
           )}
         </div>
 
+        {/* Single Statmet Upload*/}
+        <div className="form-group">
+          <label className="pr-2">Upload Single Statment: </label>
+          <input
+            type="file"
+            name="statmentUpload"
+            onChange={handleChange}
+            accept="image/png, image/jpg, image/jpeg"
+
+            // className={`${errors.statmentUpload ? "is-invalid" : ""}`}
+          />
+          {/* {errors.statmentUpload && (
+            <div className="invalid-feedback">{errors.statmentUpload}</div>
+          )} */}
+        </div>
+
+        {/* Multiple Statment Upload*/}
+        <div className="form-group">
+          <label className="pr-2">Upload Multiple Statment: </label>
+          <input
+            type="file"
+            name="multipleUpload"
+            onChange={handleChange}
+            multiple
+            // className={`${errors.statmentUpload ? "is-invalid" : ""}`}
+          />
+          {/* {errors.statmentUpload && (
+            <div className="invalid-feedback">{errors.statmentUpload}</div>
+          )} */}
+        </div>
+
         {/* Reporting Manager Dropdown */}
         <div className="form-group">
           <label>Reporting Manager:</label>
           <select
-            className={`form-control ${errors.reportingManager ? "is-invalid" : ""}`}
+            className={`form-control ${
+              errors.reportingManager ? "is-invalid" : ""
+            }`}
             name="reportingManager"
             value={formData.reportingManager}
             onChange={handleChange}
@@ -235,6 +289,53 @@ const FormComponent = ({ onFormSubmit, editUser, btnClass }) => {
             />
             <label className="form-check-label" htmlFor="cheque">
               Cheque
+            </label>
+          </div>
+        </div>
+
+        {/* Job Mode checkbox */}
+        <div className="form-group">
+          <label>Job Mode:</label>
+          <div className="form-check">
+            <input
+              type="checkbox"
+              className="form-check-input"
+              id="WFH"
+              value="WFH"
+              name="jobMode"
+              // checked={formData.jobMode === "WFH"}
+              onChange={handleChange}
+            />
+            <label className="form-check-label" htmlFor="WFH">
+              WFH
+            </label>
+          </div>
+          <div className="form-check">
+            <input
+              type="checkbox"
+              className="form-check-input"
+              id="WFO"
+              value="WFO"
+              name="jobMode"
+              // checked={formData.jobMode === "WFO"}
+              onChange={handleChange}
+            />
+            <label className="form-check-label" htmlFor="WFO">
+            WFO
+            </label>
+          </div>
+          <div className="form-check">
+            <input
+              type="checkbox"
+              className="form-check-input"
+              id="Remote"
+              value="Remote"
+              name="jobMode"
+              // checked={formData.jobMode === "Remote"}
+              onChange={handleChange}
+            />
+            <label className="form-check-label" htmlFor="Remote">
+            Remote
             </label>
           </div>
         </div>

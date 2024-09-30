@@ -43,6 +43,14 @@ const UserTable = () => {
     }
   };
 
+  const [selectedImage, setSelectedImage] = useState(null);
+  const handleImageClick = (file) => {
+    if (file instanceof File) {
+      setSelectedImage(URL.createObjectURL(file)); // generate temp url
+    } else if (typeof file === "string") {
+      setSelectedImage(file); // use URl if it is a string
+    }
+  };
   return (
     <div className="container-fluid mt-5">
       <h2>User List</h2>
@@ -54,15 +62,17 @@ const UserTable = () => {
           aria-label="Search"
           aria-describedby="search-addon"
           value={userName}
-          onChange={(e) => { dispatch(setUserName(e.target.value))
-            setStartOf(0);}}
+          onChange={(e) => {
+            dispatch(setUserName(e.target.value));
+            setStartOf(0);
+          }}
         />
         <span className="btn btn-dark">
           <i className="fa fa-search"></i>
         </span>
       </div>
-      <table className="table table-striped table-hover mt-3">
-        <thead>
+      <table className="table table-striped table-hover mt-3 table-responsive">
+        <thead className="table-light">
           <tr>
             {/* <th className="text-center">Status</th> */}
             <th className="text-center">Name</th>
@@ -72,6 +82,9 @@ const UserTable = () => {
             <th className="text-center">salary</th>
             <th className="text-center">Reporting Manager</th>
             <th className="text-center">Salary Credit</th>
+            <th className="text-center">Job Mode</th>
+            <th className="text-center">Single Statment</th>
+            <th className="text-center">Multiple Statment</th>
             <th className="text-center">Action</th>
           </tr>
         </thead>
@@ -91,6 +104,62 @@ const UserTable = () => {
                 <td className="text-center">{user.salary}</td>
                 <td className="text-center">{user.reportingManager}</td>
                 <td className="text-center">{user.salaryCredit}</td>
+                <td className="text-center">{user.jobMode}</td>
+                
+                {/* Uploaded file  Single*/}
+                <td className="text-center">
+                  {user.statmentUpload ? (
+                    <>
+                      <img
+                        src={
+                          user.statmentUpload instanceof File
+                            ? URL.createObjectURL(user.statmentUpload)
+                            : user.statmentUpload
+                        }
+                        alt="Uploaded File"
+                        style={{
+                          width: "100px",
+                          height: "100px",
+                          objectFit: "cover",
+                          cursor: "pointer",
+                          borderRadius: "10px",
+                        }}
+                        onClick={() => handleImageClick(user.statmentUpload)} // When clicked, show the image at the bottom
+                      />
+                    </>
+                  ) : (
+                    "No Statement"
+                  )}
+                </td>
+
+                {/* Uploaded files - Multiple */}
+                <td className="text-center">
+                  {Array.isArray(user.multipleUpload) &&
+                  user.multipleUpload.length > 0
+                    ? user.multipleUpload.map((file, index) => {
+                        {
+                          /* console.log("File:", file); // Add this line to log file content */
+                        }
+                        return (
+                          <div key={index}>
+                            {file instanceof File ? (
+                              <a
+                                href={URL.createObjectURL(file)} // Generate URL for each file object
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <span>{file.name}</span>{" "}
+                                {/* Display the file name */}
+                              </a>
+                            ) : (
+                              <span>Invalid file</span>
+                            )}
+                          </div>
+                        );
+                      })
+                    : "No Files Uploaded"}
+                </td>
+
                 <td>
                   <td>
                     <button
@@ -133,23 +202,58 @@ const UserTable = () => {
       <button className="btn btn-primary float-right" onClick={forward}>
         Next
       </button>
+      
+      {/*Renderinrg the image at the buttom of the table */}
+      {selectedImage && (
+        <div style={{ marginTop: "20px", textAlign: "center", color:"blue", paddingTop:"40px", paddingBottom:"30px"}}>
+          <h3>Selected Image</h3>
+          <img
+            src={selectedImage}
+            alt="Selected"
+            style={{
+              width: "400px",
+              height: "auto",
+              objectFit: "contain",
+              borderRadius: "10px",
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };
 
 export default UserTable;
 
-
-
-
-
-
-
-
-
-
-
-
+// ===========================for upload======================================
+// {user.statmentUpload ? (
+//   <a
+//     href={
+//       user.statmentUpload instanceof File
+//         ? URL.createObjectURL(user.statmentUpload) // Generate URL for the file object
+//         : user.statmentUpload // Assume it's a URL if it's not a File object
+//     }
+//     target="_blank"
+//     rel="noopener noreferrer"
+//   >
+//     {/* Display the image preview if it's a File object or a valid URL */}
+//     <img
+//       src={
+//         user.statmentUpload instanceof File
+//           ? URL.createObjectURL(user.statmentUpload) // Generate a temporary URL for the image file
+//           : user.statmentUpload // Use the URL directly if it's a string
+//       }
+//       alt="Uploaded File"
+//       style={{
+//         width: "100px",
+//         height: "100px",
+//         objectFit: "cover",
+//       }} // Style the image preview
+//     />
+//   </a>
+// ) : (
+//   "No Statement"
+// )}
 
 // import React, { useState } from "react";
 // import { useNavigate } from "react-router-dom";

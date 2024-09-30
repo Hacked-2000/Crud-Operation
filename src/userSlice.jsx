@@ -21,8 +21,11 @@ const initialState = {
     mobile: "",
     organisation: "",
     salary: "",
+    statmentUpload: "",
+    multipleUpload: [],
     reportingManager: "",
     salaryCredit: "",
+    jobMode:[],
   },
   btnClass: 'btn-primary', // Default button class
 };
@@ -33,6 +36,7 @@ const usersSlice = createSlice({
   reducers: {
     addUser: (state, action) => {
       state.users.push(action.payload);
+      state.formData.statmentUpload = action.payload;
       localStorage.setItem('users', JSON.stringify(state.users));
     },
     updateUser: (state, action) => {
@@ -43,7 +47,8 @@ const usersSlice = createSlice({
       }
     },
     deleteUser: (state, action) => {
-      state.users = state.users.filter(user => user.id !== action.payload);
+      const updatedUser = state.users = state.users.filter(user => user.id !== action.payload);
+      state.users = updatedUser;
       localStorage.setItem('users', JSON.stringify(state.users));
     },
     setEditUser: (state, action) => {
@@ -70,6 +75,12 @@ const usersSlice = createSlice({
     setFormData: (state, action) => {
       state.formData = { ...state.formData, ...action.payload }; // Update form data
     },
+    // uploadBankStatement: (state, action) => {
+    //   state.formData.statmentUpload = action.payload; // Set the uploaded bank statement
+    // },
+    // uploadFiles: (state, action) => {
+    //   state.formData.UploadedFile = action.payload; // Set the uploaded files array
+    // },
   },
 });
 
